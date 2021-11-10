@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Display a map</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.css" rel="stylesheet" />
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+  <div id="map"></div>
+  <div class="map-overlay" id="features">
+    <h2>Building footprint map</h2>
+    <div id="pd"><p>The land use is: </p></div>
+  </div>
+  <div class="map-overlay" id="legend"></div>
+  <div class="city-select" id="city-select">
+      <h2>Select City: </h2> 
+      <select name="city" id="city">
+        <option value="Seattle">Seattle</option>
+        <option value="Philadelphia">Philadelphia</option>
+      </select>
+  </div>
+    <script>
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoibWljaGFlbHdhcmQiLCJhIjoiY2ttdjhybm5sMDJxbzJ2cGE0aGJ0amd1NSJ9.kl25FZDxxWAE4ikmqXJelQ';
+
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/michaelward/ckvrbmr799i8814lce42fpvor',
+        zoom: 10,
+        center: [-122.276, 47.623]
+        });  
+
+    var layers = ['Commercial / Mixed Use', 'Residential', 
+    'Institutional', 'Recreational', 'Industrial', 
+    'Easement', 'Water', 'Transportation','Vacant', 'Other'];
+    var colors = ['#e60505', '#fcfc03', '#2306f9', '#00d62e',
+    '#5e04b9', '#532b03', '#75f8ff', '#858585', '#ffffff', '#db0666'];
+    for (i = 0; i < layers.length; i++) {
+        var layer = layers[i];
+        var color = colors[i];
+        var item = document.createElement('div');
+        var key = document.createElement('span');
+        key.className = 'legend-key';
+        key.style.backgroundColor = color;var value = document.createElement('span');
+        value.innerHTML = layer;
+        item.appendChild(key);
+        item.appendChild(value);
+        legend.appendChild(item);
+    }
+
+    map.on('load', function() {
+      map.getCanvas().style.cursor = 'default';
+      map.fitBounds([
+          [-122.632828,47.428552],
+          [-121.973648,47.806237]
+        ]);
+        
+        // change info window on hover
+        map.on('mousemove', function(e) {
+          var states = map.queryRenderedFeatures(e.point, {
+            layers: ['buildings','seattle-parcel']}   
+        );
+          if (states.length > 0 && 'landuse' in states[0].properties) {
+            document.getElementById('pd').innerHTML =
+              '<p> The land use is: </p>' +
+              '<strong><em>' +
+              states[0].properties.landuse;
+          } else if (states.length > 0 && 'LAND_USE_DESC_10' in states[0].properties) {
+            document.getElementById('pd').innerHTML =
+              '<p> The land use is: </p>' +
+              '<strong><em>' +
+              states[0].properties.LAND_USE_DESC_10;
+          } else {
+            document.getElementById('pd').innerHTML =
+              '<p>The land use is: </p>';  
+          }
+        }); 
+    });
+    
+    // zoom to city selection
+    document.getElementById('city').addEventListener('change', (event) => {
+        if (`${event.target.value}` == "Philadelphia") {
+            map.flyTo({
+                center: [-75.150996, 39.992945],
+                essential: true,
+                zoom:10
+            });
+        } else {
+            map.flyTo({
+                center: [-122.276, 47.623],
+                essential: true,
+                zoom: 10
+            });
+        }
+    });
+
+    </script>
+</body>
+</html>
