@@ -17,10 +17,13 @@
   </div>
   <div class="map-overlay" id="legend"></div>
   <div class="city-select" id="city-select">
-      <h2>Select City: </h2> 
+      <h3>Select City: </h3> 
       <select name="city" id="city">
-        <option value="Seattle">Seattle</option>
-        <option value="Philadelphia">Philadelphia</option>
+        <option value="NYC">New York City, NY</option>
+        <option value="Chicago">Chicago, IL</option>
+        <option value="Seattle">Seattle, WA</option>
+        <option value="Philadelphia">Philadelphia, PA</option>
+        <option value="Portland">Portland, OR</option>
       </select>
   </div>
     <script>
@@ -29,9 +32,10 @@
 
     var map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/michaelward/ckvrbmr799i8814lce42fpvor',
-        zoom: 10,
-        center: [-122.276, 47.623]
+        style: 'mapbox://styles/michaelward/ckvumz2dp35cm14p66jpyk2a6',
+        zoom: 12,
+        center: [-73.935242, 40.730610],
+        pitch: 70
         });  
 
     var layers = ['Commercial / Mixed Use', 'Residential', 
@@ -51,29 +55,20 @@
         item.appendChild(value);
         legend.appendChild(item);
     }
-
+ 
     map.on('load', function() {
       map.getCanvas().style.cursor = 'default';
-      map.fitBounds([
-          [-122.632828,47.428552],
-          [-121.973648,47.806237]
-        ]);
         
         // change info window on hover
         map.on('mousemove', function(e) {
           var states = map.queryRenderedFeatures(e.point, {
-            layers: ['buildings','seattle-parcel']}   
+            layers: ['nyc-repair2','ord','stl','pdx','phl']}   
         );
-          if (states.length > 0 && 'landuse' in states[0].properties) {
+          if (states.length > 0) {
             document.getElementById('pd').innerHTML =
               '<p> The land use is: </p>' +
               '<strong><em>' +
               states[0].properties.landuse;
-          } else if (states.length > 0 && 'LAND_USE_DESC_10' in states[0].properties) {
-            document.getElementById('pd').innerHTML =
-              '<p> The land use is: </p>' +
-              '<strong><em>' +
-              states[0].properties.LAND_USE_DESC_10;
           } else {
             document.getElementById('pd').innerHTML =
               '<p>The land use is: </p>';  
@@ -87,13 +82,36 @@
             map.flyTo({
                 center: [-75.150996, 39.992945],
                 essential: true,
-                zoom:10
+                zoom:12,
+                pitch: 70
             });
-        } else {
+        } else if (`${event.target.value}` == "Seattle") {
             map.flyTo({
                 center: [-122.276, 47.623],
                 essential: true,
-                zoom: 10
+                zoom: 12,
+                pitch: 70
+            });
+        } else if (`${event.target.value}` == "NYC") {
+            map.flyTo({
+                center: [-73.935242, 40.730610],
+                essential: true,
+                zoom: 12,
+                pitch: 70
+            });
+        } else if (`${event.target.value}` == "Portland") {
+            map.flyTo({
+                center: [-122.676483, 45.523064],
+                essential: true,
+                zoom: 12,
+                pitch: 70
+            });
+        } else if (`${event.target.value}` == "Chicago") {
+            map.flyTo({
+                center: [-87.554420, 41.881832],
+                essential: true,
+                zoom: 12,
+                pitch: 70
             });
         }
     });
